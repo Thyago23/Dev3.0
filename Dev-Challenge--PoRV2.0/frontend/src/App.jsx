@@ -19,12 +19,16 @@ function App() {
     localStorage.getItem('isAuthenticated') === 'true'
   );
 
-  const userRole = localStorage.getItem('userRole') || 'tech';
+  const userRole = localStorage.getItem('userRole') || 'user';
 
   const [cart, setCart] = useState([]);
-  const [orders, setOrders] = useState([]);
   
-  // LISTA MAESTRA UNIFICADA: Ahora contiene los 4 artículos únicos
+  // MODIFICACIÓN: Leer pedidos del localStorage al iniciar
+  const [orders, setOrders] = useState(() => {
+    const savedOrders = localStorage.getItem('myOrders');
+    return savedOrders ? JSON.parse(savedOrders) : [];
+  });
+  
   const [products, setProducts] = useState([
     {
       id: 1,
@@ -108,8 +112,13 @@ function App() {
     setCart((prevCart) => prevCart.filter(item => item.id !== productId));
   };
 
+  // MODIFICACIÓN: Guardar el pedido en localStorage para persistencia
   const onCompleteOrder = (newOrder) => {
-    setOrders((prevOrders) => [newOrder, ...prevOrders]);
+    setOrders((prevOrders) => {
+      const updatedOrders = [newOrder, ...prevOrders];
+      localStorage.setItem('myOrders', JSON.stringify(updatedOrders));
+      return updatedOrders;
+    });
     setCart([]);
   };
 
@@ -120,7 +129,6 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-white font-sans text-gray-900 flex flex-col">
-        {/* --- NAVBAR --- */}
         <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 p-6 border-b border-gray-100">
           <div className="max-w-[1600px] mx-auto flex justify-between items-center px-4">
             <Link to="/" className="text-2xl font-black text-[#01c38e] tracking-tighter uppercase flex items-center gap-2">
@@ -173,19 +181,17 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login onLogin={() => setIsAuthenticated(true)} />} />
             <Route path="/register" element={<Register />} />
-            
             <Route path="/marketplace" element={<Marketplace newProducts={products} addToCart={addToCart} />} />
-            
-            {/* RUTA DINÁMICA: DETALLE DEL PRODUCTO */}
             <Route path="/product/:id" element={<ProductDetail products={products} addToCart={addToCart} />} />
-            
             <Route path="/verify-repair" element={<VerifyPublic />} />
             <Route path="/cart" element={<CartView cart={cart} removeFromCart={removeFromCart} onCompleteOrder={onCompleteOrder} />} />
             <Route path="/profile" element={isAuthenticated ? <UserDashboard orders={orders} /> : <Navigate to="/login" />} />
-
             <Route path="/sell" element={isAuthenticated && userRole === 'tech' ? <SellerPanel addNewProduct={addNewProduct} /> : <Navigate to="/marketplace" />} />
             
-            <Route path="/dashboard" element={isAuthenticated && localStorage.getItem('userRole') === 'tech' ? <RepairForm /> : <Navigate to="/profile" />} />
+            <Route 
+              path="/dashboard" 
+              element={isAuthenticated ? <RepairForm /> : <Navigate to="/profile" />} 
+            />
             
             <Route path="/certificate" element={<ImpactCertificate />} />
             <Route path="/verify/:id" element={<VerifyPage />} />

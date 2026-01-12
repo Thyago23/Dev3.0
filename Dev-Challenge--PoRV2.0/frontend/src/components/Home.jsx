@@ -17,7 +17,7 @@ const Home = () => {
       <section className="max-w-[1600px] mx-auto px-6 py-20 lg:py-32 grid lg:grid-cols-2 gap-16 items-center">
         <div>
           <div className="inline-flex items-center gap-2 bg-[#01c38e]/10 text-[#01c38e] px-4 py-2 rounded-full text-[10px] font-black tracking-[0.2em] uppercase mb-8 border border-[#01c38e]/30">
-            <ShieldCheck size={14} /> Protocolo de Confianza Descentralizado
+            <ShieldCheck size={14} /> Protocolo de Confianza con Nuestros Usuarios
           </div>
           <h1 className="text-7xl lg:text-9xl font-black leading-[0.85] tracking-tighter mb-10 text-gray-900">
             REPARAR <br /> ES EL ACTO <br /> 

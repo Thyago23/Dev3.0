@@ -29,7 +29,7 @@ const Marketplace = ({ addToCart, newProducts: externalProducts = [] }) => {
       price: 85,
       co2: 25,
       category: "Baterías",
-      image: "https://idocstore.cl/cdn/shop/products/bateria_1ec5908c-2882-4839-9083-78fb680eeef9_700x700.jpg?v=1685477695",
+      image: "https://http2.mlstatic.com/D_NQ_NP_931959-MEC85354894517_052025-O.webp",
       origin: "Nodo-405-ALFA",
       techId: "TECH-09"
     },

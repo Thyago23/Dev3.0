@@ -1,22 +1,31 @@
-import React, { useState } from 'react';
-import { ShieldCheck, Search, Calendar, HardDrive, Leaf, UserCheck, Award } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom'; // Importante para leer el ID de la URL
+import { ShieldCheck, Search, Calendar, HardDrive, Leaf, UserCheck, Award, X } from 'lucide-react';
 
 const VerifyPublic = () => {
-  const [searchId, setSearchId] = useState('');
+  const { id } = useParams(); // Captura el ID si viene de /verify/POR-XXXX
+  const [searchId, setSearchId] = useState(id || '');
   const [repairData, setRepairData] = useState(null);
   const [error, setError] = useState(false);
 
-  // Simulación de búsqueda (luego esto conectará con tu lógica de guardado)
-  const handleVerify = (e) => {
-    e.preventDefault();
-    // Simulamos que encontramos una reparación si el ID tiene algo de texto
-    if (searchId.length > 3) {
+  // EFECTO: Si hay un ID en la URL (por el QR), ejecutar la búsqueda automáticamente
+  useEffect(() => {
+    if (id) {
+      performVerification(id);
+    }
+  }, [id]);
+
+  const performVerification = (code) => {
+    const savedDevices = JSON.parse(localStorage.getItem('myDevices') || '[]');
+    const found = savedDevices.find(d => d.id.toUpperCase() === code.toUpperCase());
+
+    if (found) {
       setRepairData({
-        id: searchId.toUpperCase(),
-        date: "12 OCT 2025",
-        device: "MacBook Pro M2",
+        id: found.id,
+        date: found.date,
+        device: found.name,
         technician: "EcoTech Labs - Nodo 7",
-        impact: "24kg CO2 Ahorrados",
+        impact: `${found.co2}kg CO2 Ahorrados`,
         status: "Certificado Verificado"
       });
       setError(false);
@@ -26,9 +35,15 @@ const VerifyPublic = () => {
     }
   };
 
+  const handleVerify = (e) => {
+    e.preventDefault();
+    performVerification(searchId);
+  };
+
   return (
     <div className="min-h-screen bg-[#fafafa] flex flex-col items-center py-20 px-6">
       <div className="max-w-3xl w-full text-center">
+        
         {/* ENCABEZADO */}
         <div className="mb-12">
           <div className="inline-flex items-center gap-2 bg-[#01c38e]/10 text-[#01c38e] px-4 py-2 rounded-full mb-6">
@@ -38,24 +53,24 @@ const VerifyPublic = () => {
           <h1 className="text-5xl font-black tracking-tighter uppercase italic mb-4">
             Verifica tu <span className="text-[#01c38e]">Reparación</span>
           </h1>
-          <p className="text-gray-500 font-bold text-sm">Introduce el ID único de tu certificado para comprobar su autenticidad e impacto ambiental.</p>
+          <p className="text-gray-500 font-bold text-sm">Validación de activos mediante identificador único de protocolo.</p>
         </div>
 
-        {/* BUSCADOR GIGANTE */}
+        {/* BUSCADOR */}
         <form onSubmit={handleVerify} className="relative mb-16">
           <input 
             type="text" 
-            placeholder="EJ: POR-9923-X"
+            placeholder="Introduce el ID del certificado"
             value={searchId}
             onChange={(e) => setSearchId(e.target.value)}
             className="w-full bg-white border-2 border-gray-100 rounded-[30px] px-8 py-6 text-xl font-black uppercase tracking-widest focus:border-[#01c38e] outline-none transition-all shadow-xl shadow-black/5"
           />
-          <button className="absolute right-3 top-3 bottom-3 bg-black text-white px-8 rounded-[22px] font-black text-[10px] uppercase tracking-widest hover:bg-[#01c38e] hover:text-black transition-all flex items-center gap-2">
-            Verificar <Search size={16} />
+          <button type="submit" className="absolute right-3 top-3 bottom-3 bg-black text-white px-8 rounded-[22px] font-black text-[10px] uppercase tracking-widest hover:bg-[#01c38e] hover:text-black transition-all flex items-center gap-2">
+            Validar <Search size={16} />
           </button>
         </form>
 
-        {/* RESULTADO: EL CERTIFICADO */}
+        {/* RESULTADO (CERTIFICADO) */}
         {repairData && (
           <div className="bg-white border border-gray-100 rounded-[40px] overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-8 duration-700">
             <div className="bg-black p-8 text-white flex justify-between items-center">
@@ -63,7 +78,10 @@ const VerifyPublic = () => {
                 <p className="text-[10px] font-black text-[#01c38e] uppercase tracking-[0.3em] mb-1">Certificado Oficial</p>
                 <h3 className="text-2xl font-black tracking-tighter uppercase italic">{repairData.id}</h3>
               </div>
-              <Award size={40} className="text-[#01c38e]" />
+              <div className="flex flex-col items-end">
+                <Award size={40} className="text-[#01c38e]" />
+                <span className="text-[8px] font-bold text-[#01c38e] mt-2">AUTÉNTICO</span>
+              </div>
             </div>
             
             <div className="p-10 grid md:grid-cols-2 gap-8 text-left">
@@ -102,17 +120,23 @@ const VerifyPublic = () => {
               </div>
             </div>
 
-            <div className="bg-gray-50 p-6 border-t border-gray-100">
+            <div className="bg-gray-50 p-6 border-t border-gray-100 flex justify-between items-center">
               <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                Este documento garantiza que el dispositivo ha sido reparado siguiendo estándares de economía circular.
+                Protocolo v1.0 • Verificación Descentralizada
               </p>
+              <div className="flex gap-2">
+                 <div className="w-2 h-2 bg-[#01c38e] rounded-full animate-pulse"></div>
+                 <span className="text-[8px] font-black text-gray-400 uppercase">Nodo Activo</span>
+              </div>
             </div>
           </div>
         )}
 
         {error && (
-          <div className="text-red-500 font-black text-[10px] uppercase tracking-widest animate-pulse">
-            ID de certificado no encontrado. Por favor, revisa el código.
+          <div className="bg-red-50 text-red-500 p-6 rounded-3xl border border-red-100 inline-block">
+            <p className="font-black text-[10px] uppercase tracking-widest flex items-center gap-2">
+              <X size={14} /> ID de certificado no encontrado en el sistema.
+            </p>
           </div>
         )}
       </div>
